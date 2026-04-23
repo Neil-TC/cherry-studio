@@ -10,12 +10,10 @@ export const INTERNAL_PROVIDER: SystemProvider = {
   type: 'openai',
   apiHost: 'http://localhost:8000/v1',
   apiKey: '',
-  models: [internalDefaultModel],
+  models: [],
   isSystem: true,
   enabled: true
 }
-
-const REMOVED_SIDEBAR_ICONS = new Set<SidebarIcon>(['store', 'paintings', 'minapp', 'code_tools', 'openclaw'])
 
 export function sanitizeInternalModel(model: Model | undefined): Model {
   return model?.provider === INTERNAL_PROVIDER_ID ? model : internalDefaultModel
@@ -47,6 +45,6 @@ export function sanitizeInternalProviders(providers: Provider[] | undefined): Pr
 }
 
 export function sanitizeSidebarIcons(icons: SidebarIcon[] | undefined): SidebarIcon[] {
-  const visibleIcons = (icons ?? []).filter((icon) => !REMOVED_SIDEBAR_ICONS.has(icon))
+  const visibleIcons = icons ?? []
   return visibleIcons.includes('assistants') ? visibleIcons : ['assistants', ...visibleIcons]
 }

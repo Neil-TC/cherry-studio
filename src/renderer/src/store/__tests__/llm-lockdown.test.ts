@@ -7,10 +7,10 @@ import { describe, expect, it, vi } from 'vitest'
 describe('llm lockdown state', () => {
   it('starts with only the internal provider and internal default models', () => {
     expect(initialState.providers.map((provider) => provider.id)).toEqual([INTERNAL_PROVIDER_ID])
-    expect(initialState.defaultModel.provider).toBe(INTERNAL_PROVIDER_ID)
-    expect(initialState.quickModel.provider).toBe(INTERNAL_PROVIDER_ID)
-    expect(initialState.translateModel.provider).toBe(INTERNAL_PROVIDER_ID)
-    expect(initialState.topicNamingModel.provider).toBe(INTERNAL_PROVIDER_ID)
+    expect(initialState.defaultModel.provider).toBe('')
+    expect(initialState.quickModel.provider).toBe('')
+    expect(initialState.translateModel.provider).toBe('')
+    expect(initialState.topicNamingModel.provider).toBe('')
     expect(initialState.defaultModel).toMatchObject(internalDefaultModel)
   })
 

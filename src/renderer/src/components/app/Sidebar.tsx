@@ -5,35 +5,44 @@ import { useTheme } from '@renderer/context/ThemeProvider'
 import useAvatar from '@renderer/hooks/useAvatar'
 import { useFullscreen } from '@renderer/hooks/useFullscreen'
 import { useMinappPopup } from '@renderer/hooks/useMinappPopup'
+import { useMinapps } from '@renderer/hooks/useMinapps'
 import useNavBackgroundColor from '@renderer/hooks/useNavBackgroundColor'
 import { modelGenerating, useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { getSidebarIconLabel, getThemeModeLabel } from '@renderer/i18n/label'
-import { type SidebarIcon, ThemeMode } from '@renderer/types'
+import { ThemeMode } from '@renderer/types'
 import { isEmoji } from '@renderer/utils'
 import { Avatar, Tooltip } from 'antd'
 import {
+  Code,
   FileSearch,
   Folder,
   Languages,
+  LayoutGrid,
   MessageSquare,
   Monitor,
   Moon,
   MousePointerClick,
   NotepadText,
+  Palette,
   Settings,
+  Sparkle,
   Sun
 } from 'lucide-react'
-import type { FC, ReactNode } from 'react'
+import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
+import { OpenClawSidebarIcon } from '../Icons/SVGIcon'
 import UserPopup from '../Popups/UserPopup'
+import { SidebarOpenedMinappTabs, SidebarPinnedApps } from './PinnedMinapps'
 
 const Sidebar: FC = () => {
   const { hideMinappPopup } = useMinappPopup()
   const { minappShow } = useRuntime()
+  const { sidebarIcons } = useSettings()
+  const { pinned } = useMinapps()
 
   const { pathname } = useLocation()
   const navigate = useNavigate()
@@ -45,6 +54,8 @@ const Sidebar: FC = () => {
   const onEditUser = () => UserPopup.show()
 
   const backgroundColor = useNavBackgroundColor()
+
+  const showPinnedApps = pinned.length > 0 && sidebarIcons.visible.includes('minapp')
 
   const to = async (path: string) => {
     await modelGenerating()
@@ -69,6 +80,15 @@ const Sidebar: FC = () => {
         <Menus onClick={hideMinappPopup}>
           <MainMenus />
         </Menus>
+        <SidebarOpenedMinappTabs />
+        {showPinnedApps && (
+          <AppsContainer>
+            <Divider />
+            <Menus>
+              <SidebarPinnedApps />
+            </Menus>
+          </AppsContainer>
+        )}
       </MainMenusContainer>
       <Menus>
         <Tooltip title={t('settings.theme.title') + ': ' + getThemeModeLabel(settedTheme)} placement="right">
@@ -101,7 +121,7 @@ const Sidebar: FC = () => {
 const MainMenus: FC = () => {
   const { hideMinappPopup } = useMinappPopup()
   const { pathname } = useLocation()
-  const { sidebarIcons } = useSettings()
+  const { sidebarIcons, defaultPaintingProvider } = useSettings()
   const { minappShow } = useRuntime()
   const navigate = useNavigate()
   const { theme } = useTheme()
@@ -109,30 +129,36 @@ const MainMenus: FC = () => {
   const isRoute = (path: string): string => (pathname === path && !minappShow ? 'active' : '')
   const isRoutes = (path: string): string => (pathname.startsWith(path) && path !== '/' && !minappShow ? 'active' : '')
 
-  const iconMap: Partial<Record<SidebarIcon, ReactNode>> = {
+  const iconMap = {
     assistants: <MessageSquare size={18} className="icon" />,
     agents: <MousePointerClick size={18} className="icon" />,
+    store: <Sparkle size={18} className="icon" />,
+    paintings: <Palette size={18} className="icon" />,
     translate: <Languages size={18} className="icon" />,
+    minapp: <LayoutGrid size={18} className="icon" />,
     knowledge: <FileSearch size={18} className="icon" />,
     files: <Folder size={18} className="icon" />,
-    notes: <NotepadText size={18} className="icon" />
+    notes: <NotepadText size={18} className="icon" />,
+    code_tools: <Code size={18} className="icon" />,
+    openclaw: <OpenClawSidebarIcon style={{ width: 18, height: 18 }} className="icon" />
   }
 
-  const pathMap: Partial<Record<SidebarIcon, string>> = {
+  const pathMap = {
     assistants: '/',
     agents: '/agents',
+    store: '/store',
+    paintings: `/paintings/${defaultPaintingProvider}`,
     translate: '/translate',
+    minapp: '/apps',
     knowledge: '/knowledge',
     files: '/files',
-    notes: '/notes'
+    code_tools: '/code',
+    notes: '/notes',
+    openclaw: '/openclaw'
   }
 
   return sidebarIcons.visible.map((icon) => {
     const path = pathMap[icon]
-    const iconNode = iconMap[icon]
-    if (!path || !iconNode) {
-      return null
-    }
     const isActive = path === '/' ? isRoute(path) : isRoutes(path)
 
     return (
@@ -144,7 +170,7 @@ const MainMenus: FC = () => {
             navigate(path)
           }}>
           <Icon theme={theme} className={isActive}>
-            {iconNode}
+            {iconMap[icon]}
           </Icon>
         </StyledLink>
       </Tooltip>
@@ -250,6 +276,18 @@ const Icon = styled.div<{ theme: string }>`
     opacity: 0.3;
     border: 0.5px solid var(--color-primary);
   }
+`
+
+const AppsContainer = styled.div`
+  margin-top: auto;
+  margin-bottom: 8px;
+`
+
+const Divider = styled.div`
+  width: 24px;
+  height: 0.5px;
+  background-color: var(--color-border);
+  margin: 0 auto 8px;
 `
 
 const StyledLink = styled.div`

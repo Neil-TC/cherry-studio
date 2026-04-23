@@ -8,9 +8,9 @@ export const qwenModel: Model = {
 }
 
 export const internalDefaultModel: Model = {
-  id: 'local-model',
-  name: 'Local Model',
-  provider: 'internal',
+  id: '',
+  name: '',
+  provider: '',
   group: 'Internal'
 }
 
@@ -25,7 +25,7 @@ export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> =
     // Default quick assistant model
     internalDefaultModel
   ],
-  internal: [internalDefaultModel],
+  internal: [],
   cherryin: [],
   vertexai: [],
   sophnet: [],

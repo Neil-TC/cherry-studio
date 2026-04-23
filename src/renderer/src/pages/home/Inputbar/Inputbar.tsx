@@ -25,6 +25,7 @@ import { getDefaultTopic } from '@renderer/services/AssistantService'
 import { CacheService } from '@renderer/services/CacheService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import FileManager from '@renderer/services/FileManager'
+import { hasModel } from '@renderer/services/ModelService'
 import { checkRateLimit, getUserMessage } from '@renderer/services/MessagesService'
 import { spanManagerService } from '@renderer/services/SpanManagerService'
 import { estimateTextTokens as estimateTxtTokens, estimateUserPromptUsage } from '@renderer/services/TokenService'
@@ -168,6 +169,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   const dispatch = useAppDispatch()
   const isVisionAssistant = useMemo(() => isVisionModel(model), [model])
   const isGenerateImageAssistant = useMemo(() => isGenerateImageModel(model), [model])
+  const isModelReady = useMemo(() => Boolean(hasModel(model)), [model])
   const { setTimeoutTimer } = useTimer()
   const isMultiSelectMode = useAppSelector((state) => state.runtime.chat.isMultiSelectMode)
 
@@ -502,6 +504,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
       leftToolbar={leftToolbar}
       rightToolbar={rightToolbar}
       topContent={topContent}
+      isModelReady={isModelReady}
     />
   )
 }

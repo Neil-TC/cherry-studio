@@ -69,16 +69,21 @@ describe('internal lockdown helpers', () => {
         group: 'OpenAI'
       })
     ).toMatchObject({
-      id: 'local-model',
-      name: 'Local Model',
-      provider: 'internal',
+      id: '',
+      name: '',
+      provider: '',
       group: 'Internal'
     })
   })
 
-  it('filters removed sidebar icons and keeps assistants', () => {
+  it('preserves sidebar icons and keeps assistants as required', () => {
     expect(sanitizeSidebarIcons(['assistants', 'store', 'paintings', 'minapp', 'code_tools', 'openclaw'])).toEqual([
-      'assistants'
+      'assistants',
+      'store',
+      'paintings',
+      'minapp',
+      'code_tools',
+      'openclaw'
     ])
   })
 })

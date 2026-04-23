@@ -56,6 +56,7 @@ export interface InputbarCoreProps {
 
   supportedExts: string[]
   isLoading: boolean
+  isModelReady?: boolean
 
   onPause?: () => void
   handleSendMessage: () => void
@@ -115,6 +116,7 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
   onHeightChange,
   supportedExts,
   isLoading,
+  isModelReady = true,
   onPause,
   handleSendMessage,
   leftToolbar,
@@ -189,7 +191,7 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
   // 判断是否有内容：文本不为空或有文件
   const noContent = isEmpty && files.length === 0
   // 发送入口统一禁用条件：空内容、正在生成、全局搜索态
-  const isSendDisabled = noContent || isLoading || searching
+  const isSendDisabled = noContent || isLoading || searching || !isModelReady
 
   useEffect(() => {
     setExtensions(supportedExts)
@@ -615,6 +617,13 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
         isLoading={isTranslating}
       />
     )
+    if (!isModelReady) {
+      extras.push(
+        <ModelRequiredHint key="model-required-hint">
+          {t('code.model_required', { defaultValue: 'Please select a model' })}
+        </ModelRequiredHint>
+      )
+    }
     extras.push(<SendMessageButton sendMessage={handleSendMessage} disabled={isSendDisabled} />)
 
     if (isLoading) {
@@ -628,7 +637,7 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
     }
 
     return <>{extras}</>
-  }, [text, onTranslated, isTranslating, handleSendMessage, isSendDisabled, isLoading, t, onPause])
+  }, [text, onTranslated, isTranslating, handleSendMessage, isSendDisabled, isLoading, isModelReady, t, onPause])
 
   const quickPanelElement = config.enableQuickPanel ? <QuickPanelView setInputText={setText} /> : null
 
@@ -783,6 +792,11 @@ const BottomBar = styled.div`
   position: relative;
   z-index: 2;
   flex-shrink: 0;
+`
+
+const ModelRequiredHint = styled.span`
+  color: var(--color-text-3);
+  font-size: 12px;
 `
 
 const LeftSection = styled.div`

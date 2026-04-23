@@ -8,10 +8,15 @@ interface NavigateToolInput {
 const ROUTE_LABELS: Record<string, { icon: string; label: string }> = {
   // Top-level pages
   '/': { icon: '🏠', label: 'Home' },
+  '/store': { icon: '🏪', label: 'Store' },
+  '/paintings': { icon: '🎨', label: 'Paintings' },
   '/translate': { icon: '🌐', label: 'Translate' },
   '/files': { icon: '📁', label: 'Files' },
   '/notes': { icon: '📝', label: 'Notes' },
   '/knowledge': { icon: '📚', label: 'Knowledge' },
+  '/apps': { icon: '📦', label: 'Mini Apps' },
+  '/code': { icon: '💻', label: 'Code Tools' },
+  '/openclaw': { icon: '🦞', label: 'OpenClaw' },
   '/launchpad': { icon: '🚀', label: 'Launchpad' },
   '/agents': { icon: '🤖', label: 'Agents' },
 
@@ -22,6 +27,7 @@ const ROUTE_LABELS: Record<string, { icon: string; label: string }> = {
   '/settings/display': { icon: '🖥️', label: 'Display' },
   '/settings/data': { icon: '💾', label: 'Data' },
   '/settings/mcp': { icon: '🔌', label: 'MCP' },
+  '/settings/websearch': { icon: '🔍', label: 'Web Search' },
   '/settings/memory': { icon: '🧠', label: 'Memory' },
   '/settings/api-server': { icon: '🌐', label: 'API Server' },
   '/settings/docprocess': { icon: '📄', label: 'Doc Processing' },
@@ -33,8 +39,15 @@ const ROUTE_LABELS: Record<string, { icon: string; label: string }> = {
 
   // MCP sub-pages
   '/settings/mcp/servers': { icon: '📋', label: 'MCP Servers' },
+  '/settings/mcp/builtin': { icon: '📦', label: 'Built-in MCP' },
+  '/settings/mcp/marketplaces': { icon: '🛒', label: 'MCP Market' },
+  '/settings/mcp/npx-search': { icon: '🔍', label: 'NPX Search' },
   '/settings/mcp/mcp-install': { icon: '📥', label: 'Install MCP' },
-  '/settings/mcp/settings': { icon: '⚙️', label: 'MCP Settings' }
+  '/settings/mcp/settings': { icon: '⚙️', label: 'MCP Settings' },
+
+  // Web Search sub-pages
+  '/settings/websearch/general': { icon: '🔍', label: 'Search Settings' },
+  '/settings/websearch/provider': { icon: '🔍', label: 'Search Provider' }
 }
 
 // Sorted by path length descending for longest prefix match

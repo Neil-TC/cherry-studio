@@ -165,18 +165,30 @@ describe('internal lockdown migration', () => {
           isBunInstalled: true
         }
       } as any,
-      207
+      208
     )
 
     expect(migrated.llm.providers).toHaveLength(1)
     expect(migrated.llm.providers[0].id).toBe(INTERNAL_PROVIDER_ID)
     expect(migrated.llm.providers[0].models.every((model: any) => model.provider === INTERNAL_PROVIDER_ID)).toBe(true)
-    expect(migrated.llm.defaultModel.provider).toBe(INTERNAL_PROVIDER_ID)
-    expect(migrated.llm.quickModel.provider).toBe(INTERNAL_PROVIDER_ID)
-    expect(migrated.llm.translateModel.provider).toBe(INTERNAL_PROVIDER_ID)
-    expect(migrated.llm.topicNamingModel.provider).toBe(INTERNAL_PROVIDER_ID)
+    expect(migrated.llm.defaultModel.provider).toBe('')
+    expect(migrated.llm.quickModel.provider).toBe('')
+    expect(migrated.llm.translateModel.provider).toBe('')
+    expect(migrated.llm.topicNamingModel.provider).toBe('')
 
-    expect(migrated.settings.sidebarIcons.visible).toEqual(['assistants'])
+    expect(migrated.settings.sidebarIcons.visible).toEqual([
+      'assistants',
+      'agents',
+      'store',
+      'paintings',
+      'translate',
+      'minapp',
+      'knowledge',
+      'files',
+      'notes',
+      'code_tools',
+      'openclaw'
+    ])
     expect(migrated.settings.sidebarIcons.disabled).toEqual([])
 
     expect(migrated.minapps.enabled).toEqual([])

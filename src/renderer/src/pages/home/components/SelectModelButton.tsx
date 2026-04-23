@@ -3,8 +3,8 @@ import { SelectChatModelPopup } from '@renderer/components/Popups/SelectModelPop
 import { isLocalAi } from '@renderer/config/env'
 import { isEmbeddingModel, isRerankModel, isWebSearchModel } from '@renderer/config/models'
 import { useAssistant } from '@renderer/hooks/useAssistant'
-import { useProvider } from '@renderer/hooks/useProvider'
-import { getProviderName } from '@renderer/services/ProviderService'
+import { hasModel } from '@renderer/services/ModelService'
+import { getProviderByModel, getProviderName } from '@renderer/services/ProviderService'
 import type { Assistant, Model } from '@renderer/types'
 import { Button, Tag } from 'antd'
 import { ChevronsUpDown } from 'lucide-react'
@@ -21,7 +21,8 @@ const SelectModelButton: FC<Props> = ({ assistant }) => {
   const { model, updateAssistant } = useAssistant(assistant.id)
   const { t } = useTranslation()
   const timerRef = useRef<NodeJS.Timeout>(undefined)
-  const provider = useProvider(model?.provider)
+  const isModelReady = hasModel(model)
+  const provider = isModelReady ? getProviderByModel(model) : undefined
 
   const modelFilter = (model: Model) => !isEmbeddingModel(model) && !isRerankModel(model)
 
@@ -51,18 +52,19 @@ const SelectModelButton: FC<Props> = ({ assistant }) => {
     return null
   }
 
-  const providerName = getProviderName(model)
+  const providerName = isModelReady ? getProviderName(model) : ''
+  const modelName = isModelReady && model?.name ? model.name : t('button.select_model')
 
   return (
     <DropdownButton size="small" type="text" onClick={onSelectModel}>
       <ButtonContent>
         <ModelAvatar model={model} size={20} />
         <ModelName>
-          {model ? model.name : t('button.select_model')} {providerName ? ' | ' + providerName : ''}
+          {modelName} {providerName ? ' | ' + providerName : ''}
         </ModelName>
       </ButtonContent>
       <ChevronsUpDown size={14} color="var(--color-icon)" />
-      {!provider && <Tag color="error">{t('models.invalid_model')}</Tag>}
+      {!provider && model?.id && <Tag color="error">{t('models.invalid_model')}</Tag>}
     </DropdownButton>
   )
 }

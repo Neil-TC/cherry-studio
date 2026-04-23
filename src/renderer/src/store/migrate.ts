@@ -44,6 +44,7 @@ import type {
   Model,
   Provider,
   ProviderApiOptions,
+  SidebarIcon,
   TranslateLanguageCode,
   WebSearchProvider
 } from '@renderer/types'
@@ -3480,6 +3481,34 @@ const migrateConfig = {
       return state
     } catch (error) {
       logger.error('migrate 207 error', error as Error)
+      return state
+    }
+  },
+  '208': (state: RootState) => {
+    try {
+      const fullSidebarIcons: SidebarIcon[] = [
+        'assistants',
+        'agents',
+        'store',
+        'paintings',
+        'translate',
+        'minapp',
+        'knowledge',
+        'files',
+        'notes',
+        'code_tools',
+        'openclaw'
+      ]
+
+      if (state.settings?.sidebarIcons) {
+        state.settings.sidebarIcons.visible = fullSidebarIcons
+        state.settings.sidebarIcons.disabled = []
+      }
+
+      logger.info('migrate 208 success')
+      return state
+    } catch (error) {
+      logger.error('migrate 208 error', error as Error)
       return state
     }
   }
