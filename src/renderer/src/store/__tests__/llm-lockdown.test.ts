@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { INTERNAL_PROVIDER_ID } from '@renderer/config/internalLockdown'
 import { internalDefaultModel } from '@renderer/config/models/default'
 import llmReducer, { initialState, updateProviders } from '@renderer/store/llm'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 describe('llm lockdown state', () => {
   it('starts with only the internal provider and internal default models', () => {
@@ -68,5 +68,54 @@ describe('llm lockdown state', () => {
         group: 'Internal'
       }
     ])
+  })
+
+  it('getStoreProviders returns only the internal provider', async () => {
+    vi.resetModules()
+    vi.doMock('@renderer/store', () => ({
+      __esModule: true,
+      useAppDispatch: () => () => undefined,
+      useAppSelector: (selector: (state: any) => unknown) =>
+        selector({
+          llm: {
+            providers: [
+              {
+                id: INTERNAL_PROVIDER_ID,
+                name: 'Internal Server',
+                type: 'openai',
+                apiHost: 'http://localhost:8000/v1',
+                apiKey: '',
+                models: [internalDefaultModel],
+                isSystem: true,
+                enabled: true
+              }
+            ]
+          }
+        }),
+      default: {
+        getState: () => ({
+          llm: {
+            providers: [
+              {
+                id: INTERNAL_PROVIDER_ID,
+                name: 'Internal Server',
+                type: 'openai',
+                apiHost: 'http://localhost:8000/v1',
+                apiKey: '',
+                models: [internalDefaultModel],
+                isSystem: true,
+                enabled: true
+              }
+            ]
+          }
+        })
+      }
+    }))
+
+    const { getStoreProviders } = await import('@renderer/hooks/useStore')
+    const providers = getStoreProviders()
+
+    expect(providers.map((provider) => provider.id)).toEqual([INTERNAL_PROVIDER_ID])
+    expect(providers.some((provider) => provider.id === 'cherryai')).toBe(false)
   })
 })
