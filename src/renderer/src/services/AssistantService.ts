@@ -9,10 +9,12 @@ import {
 import { getModelSupportedReasoningEffortOptions } from '@renderer/config/models'
 import { isQwenMTModel } from '@renderer/config/models/qwen'
 import { UNKNOWN } from '@renderer/config/translate'
+import { INTERNAL_PROVIDER } from '@renderer/config/internalLockdown'
 import { getStoreProviders } from '@renderer/hooks/useStore'
 import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { addAssistant } from '@renderer/store/assistants'
+import { INTERNAL_PROVIDER_ID } from '@renderer/config/internalLockdown'
 import type {
   Assistant,
   AssistantPreset,
@@ -202,7 +204,7 @@ export function getProviderByModel(model?: Model): Provider {
 
   if (!provider) {
     const defaultProvider = providers.find((p) => p.id === getDefaultModel()?.provider)
-    return defaultProvider || providers[0]
+    return defaultProvider || providers.find((p) => p.id === INTERNAL_PROVIDER_ID) || INTERNAL_PROVIDER
   }
 
   return provider

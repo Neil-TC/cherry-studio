@@ -10,13 +10,13 @@ import { ProviderAvatar } from '@renderer/components/ProviderAvatar'
 import { useAllProviders, useProviders } from '@renderer/hooks/useProvider'
 import { useTimer } from '@renderer/hooks/useTimer'
 import ImageStorage from '@renderer/services/ImageStorage'
-import type { Provider, ProviderType } from '@renderer/types'
+import type { Provider } from '@renderer/types'
 import { isSystemProvider } from '@renderer/types'
-import { getFancyProviderName, matchKeywordsInModel, matchKeywordsInProvider, uuid } from '@renderer/utils'
+import { getFancyProviderName, matchKeywordsInModel, matchKeywordsInProvider } from '@renderer/utils'
 import { isAnthropicSupportedProvider } from '@renderer/utils/provider'
 import type { MenuProps } from 'antd'
-import { Button, Dropdown, Input, Tag } from 'antd'
-import { Check, Filter, GripVertical, PlusIcon, Search, UserPen } from 'lucide-react'
+import { Dropdown, Input, Tag } from 'antd'
+import { Check, Filter, GripVertical, Search, UserPen } from 'lucide-react'
 import type { FC } from 'react'
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,7 +27,6 @@ import useSWRImmutable from 'swr/immutable'
 import AddProviderPopup from './AddProviderPopup'
 import ModelNotesPopup from './ModelNotesPopup'
 import ProviderSetting from './ProviderSetting'
-import UrlSchemaInfoPopup from './UrlSchemaInfoPopup'
 
 const logger = loggerService.withContext('ProviderList')
 
@@ -51,7 +50,7 @@ interface ProviderListProps {
 const ProviderList: FC<ProviderListProps> = ({ isOnboarding = false }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const providers = useAllProviders()
-  const { updateProviders, addProvider, removeProvider, updateProvider } = useProviders()
+  const { updateProviders, removeProvider, updateProvider } = useProviders()
   const { setTimeoutTimer } = useTimer()
   const [selectedProvider, _setSelectedProvider] = useState<Provider>(providers[0])
   const { t } = useTranslation()
@@ -123,93 +122,6 @@ const ProviderList: FC<ProviderListProps> = ({ isOnboarding = false }) => {
       setSearchParams(searchParams)
     }
   }, [providers, searchParams, setSearchParams, setSelectedProvider, setTimeoutTimer])
-
-  // Handle provider add key from URL schema
-  useEffect(() => {
-    const handleProviderAddKey = async (data: {
-      id: string
-      apiKey: string
-      baseUrl: string
-      type?: ProviderType
-      name?: string
-    }) => {
-      const { id } = data
-
-      const { updatedProvider, isNew, displayName } = await UrlSchemaInfoPopup.show(data)
-      window.navigate(`/settings/provider?id=${id}`)
-
-      if (!updatedProvider) {
-        return
-      }
-
-      if (isNew) {
-        addProvider(updatedProvider)
-      } else {
-        updateProvider(updatedProvider)
-      }
-
-      setSelectedProvider(updatedProvider)
-      window.toast.success(t('settings.models.provider_key_added', { provider: displayName }))
-    }
-
-    // 检查 URL 参数
-    const addProviderData = searchParams.get('addProviderData')
-    if (!addProviderData) {
-      return
-    }
-
-    try {
-      const { id, apiKey: newApiKey, baseUrl, type, name } = JSON.parse(addProviderData)
-      if (!id || !newApiKey || !baseUrl) {
-        window.toast.error(t('settings.models.provider_key_add_failed_by_invalid_data'))
-        window.navigate('/settings/provider')
-        return
-      }
-
-      void handleProviderAddKey({ id, apiKey: newApiKey, baseUrl, type, name })
-    } catch (error) {
-      window.toast.error(t('settings.models.provider_key_add_failed_by_invalid_data'))
-      window.navigate('/settings/provider')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
-
-  const onAddProvider = async () => {
-    const { name: providerName, type, logo } = await AddProviderPopup.show()
-
-    if (!providerName.trim()) {
-      return
-    }
-
-    const provider = {
-      id: uuid(),
-      name: providerName.trim(),
-      type,
-      apiKey: '',
-      apiHost: '',
-      models: [],
-      enabled: true,
-      isSystem: false
-    } as Provider
-
-    let updatedLogos = { ...providerLogos }
-    if (logo) {
-      try {
-        await ImageStorage.set(`provider-${provider.id}`, logo)
-        updatedLogos = {
-          ...updatedLogos,
-          [provider.id]: logo
-        }
-        setProviderLogos(updatedLogos)
-      } catch (error) {
-        logger.error('Failed to save logo', error as Error)
-        window.toast.error(t('message.error.save_provider_logo'))
-      }
-    }
-
-    addProvider(provider)
-    setSelectedProvider(provider)
-  }
 
   const getDropdownMenus = (provider: Provider): MenuProps['items'] => {
     const noteMenu = {
@@ -401,7 +313,7 @@ const ProviderList: FC<ProviderListProps> = ({ isOnboarding = false }) => {
           itemKey={itemKey}
           overscan={3}
           style={{
-            height: `calc(100% - 2 * ${BUTTON_WRAPPER_HEIGHT}px)`
+            height: `calc(100% - ${BUTTON_WRAPPER_HEIGHT}px)`
           }}
           scrollerStyle={{
             padding: 8,
@@ -435,15 +347,6 @@ const ProviderList: FC<ProviderListProps> = ({ isOnboarding = false }) => {
             </Dropdown>
           )}
         </DraggableVirtualList>
-        <AddButtonWrapper>
-          <Button
-            style={{ width: '100%', borderRadius: 'var(--list-item-border-radius)' }}
-            icon={<PlusIcon size={16} />}
-            onClick={onAddProvider}
-            disabled={dragging}>
-            {t('button.add')}
-          </Button>
-        </AddButtonWrapper>
       </ProviderListContainer>
       <ProviderSetting providerId={selectedProvider.id} key={selectedProvider.id} isOnboarding={isOnboarding} />
     </Container>

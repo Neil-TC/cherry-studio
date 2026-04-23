@@ -22,7 +22,7 @@ export function sanitizeInternalModel(model: Model | undefined): Model {
 }
 
 export function sanitizeInternalProviders(providers: Provider[]): SystemProvider[] {
-  const existingInternalProvider = providers.find((provider) => provider.id === INTERNAL_PROVIDER_ID)
+  const existingInternalProvider = providers.findLast((provider) => provider.id === INTERNAL_PROVIDER_ID)
 
   if (!existingInternalProvider) {
     return [INTERNAL_PROVIDER]

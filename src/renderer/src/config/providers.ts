@@ -65,6 +65,7 @@ import type { AtLeast, SystemProvider, SystemProviderId } from '@renderer/types'
 import { OpenAIServiceTiers } from '@renderer/types'
 
 import { TOKENFLUX_HOST } from './constant'
+import { INTERNAL_PROVIDER } from './internalLockdown'
 import { internalDefaultModel, qwenModel, SYSTEM_MODELS } from './models'
 
 export const CHERRYAI_PROVIDER: SystemProvider = {
@@ -749,9 +750,10 @@ export const SYSTEM_PROVIDERS_CONFIG: Record<SystemProviderId, SystemProvider> =
   }
 } as const
 
-export const SYSTEM_PROVIDERS: SystemProvider[] = Object.values(SYSTEM_PROVIDERS_CONFIG)
+export const SYSTEM_PROVIDERS: SystemProvider[] = [INTERNAL_PROVIDER]
 
 export const PROVIDER_LOGO_MAP: AtLeast<SystemProviderId, string> = {
+  internal: OpenAiProviderLogo,
   cherryin: CherryInProviderLogo,
   ph8: Ph8ProviderLogo,
   '302ai': Ai302ProviderLogo,
@@ -841,6 +843,15 @@ type ProviderUrls = {
 }
 
 export const PROVIDER_URLS: Record<SystemProviderId, ProviderUrls> = {
+  internal: {
+    api: {
+      url: 'http://localhost:8000/v1'
+    },
+    websites: {
+      official: 'http://localhost:8000',
+      docs: 'http://localhost:8000/docs'
+    }
+  },
   cherryin: {
     api: {
       url: 'https://open.cherryin.net'

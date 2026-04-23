@@ -16,8 +16,13 @@
  */
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
+import {
+  INTERNAL_PROVIDER_ID,
+  sanitizeInternalModel,
+  sanitizeInternalProviders
+} from '@renderer/config/internalLockdown'
 import { isLocalAi } from '@renderer/config/env'
-import { SYSTEM_MODELS } from '@renderer/config/models'
+import { internalDefaultModel } from '@renderer/config/models'
 import { SYSTEM_PROVIDERS } from '@renderer/config/providers'
 import type { AwsBedrockAuthType, Model, Provider } from '@renderer/types'
 import { uniqBy } from 'lodash'
@@ -65,10 +70,10 @@ export interface LlmState {
 }
 
 export const initialState: LlmState = {
-  defaultModel: SYSTEM_MODELS.defaultModel[0],
-  topicNamingModel: SYSTEM_MODELS.defaultModel[1],
-  quickModel: SYSTEM_MODELS.defaultModel[1],
-  translateModel: SYSTEM_MODELS.defaultModel[2],
+  defaultModel: internalDefaultModel,
+  topicNamingModel: internalDefaultModel,
+  quickModel: internalDefaultModel,
+  translateModel: internalDefaultModel,
   quickAssistantId: '',
   providers: SYSTEM_PROVIDERS,
   settings: {
@@ -153,52 +158,85 @@ const llmSlice = createSlice({
   initialState: isLocalAi ? getIntegratedInitialState() : initialState,
   reducers: {
     updateProvider: (state, action: PayloadAction<Partial<Provider> & { id: string }>) => {
-      const index = state.providers.findIndex((p) => p.id === action.payload.id)
-      if (index !== -1) {
-        Object.assign(state.providers[index], action.payload)
+      if (action.payload.id !== INTERNAL_PROVIDER_ID) {
+        state.providers = sanitizeInternalProviders(state.providers)
+        return
       }
+
+      state.providers = sanitizeInternalProviders(
+        state.providers.map((provider) =>
+          provider.id === INTERNAL_PROVIDER_ID ? { ...provider, ...action.payload, id: INTERNAL_PROVIDER_ID } : provider
+        )
+      )
     },
     updateProviders: (state, action: PayloadAction<Provider[]>) => {
-      state.providers = action.payload
+      state.providers = sanitizeInternalProviders(action.payload)
     },
     addProvider: (state, action: PayloadAction<Provider>) => {
-      state.providers.unshift(action.payload)
+      if (action.payload.id !== INTERNAL_PROVIDER_ID) {
+        state.providers = sanitizeInternalProviders(state.providers)
+        return
+      }
+
+      state.providers = sanitizeInternalProviders([
+        ...state.providers.filter((provider) => provider.id !== INTERNAL_PROVIDER_ID),
+        action.payload
+      ])
     },
     removeProvider: (state, action: PayloadAction<Provider>) => {
-      const providerIndex = state.providers.findIndex((p) => p.id === action.payload.id)
-      if (providerIndex !== -1) {
-        state.providers.splice(providerIndex, 1)
-      }
+      state.providers = sanitizeInternalProviders(
+        state.providers.filter((provider) => provider.id !== action.payload.id)
+      )
     },
     addModel: (state, action: PayloadAction<{ providerId: string; model: Model }>) => {
-      state.providers = state.providers.map((p) =>
-        p.id === action.payload.providerId
-          ? {
-              ...p,
-              models: uniqBy(p.models.concat(action.payload.model), 'id'),
-              enabled: true
-            }
-          : p
+      if (
+        action.payload.providerId !== INTERNAL_PROVIDER_ID ||
+        action.payload.model.provider !== INTERNAL_PROVIDER_ID
+      ) {
+        state.providers = sanitizeInternalProviders(state.providers)
+        return
+      }
+
+      state.providers = sanitizeInternalProviders(
+        state.providers.map((provider) =>
+          provider.id === INTERNAL_PROVIDER_ID
+            ? {
+                ...provider,
+                models: uniqBy(provider.models.concat(action.payload.model), 'id'),
+                enabled: true
+              }
+            : provider
+        )
       )
     },
     removeModel: (state, action: PayloadAction<{ providerId: string; model: Model }>) => {
-      state.providers = state.providers.map((p) =>
-        p.id === action.payload.providerId
-          ? {
-              ...p,
-              models: p.models.filter((m) => m.id !== action.payload.model.id)
-            }
-          : p
+      if (
+        action.payload.providerId !== INTERNAL_PROVIDER_ID ||
+        action.payload.model.provider !== INTERNAL_PROVIDER_ID
+      ) {
+        state.providers = sanitizeInternalProviders(state.providers)
+        return
+      }
+
+      state.providers = sanitizeInternalProviders(
+        state.providers.map((provider) =>
+          provider.id === INTERNAL_PROVIDER_ID
+            ? {
+                ...provider,
+                models: provider.models.filter((model) => model.id !== action.payload.model.id)
+              }
+            : provider
+        )
       )
     },
     setDefaultModel: (state, action: PayloadAction<{ model: Model }>) => {
-      state.defaultModel = action.payload.model
+      state.defaultModel = sanitizeInternalModel(action.payload.model)
     },
     setQuickModel: (state, action: PayloadAction<{ model: Model }>) => {
-      state.quickModel = action.payload.model
+      state.quickModel = sanitizeInternalModel(action.payload.model)
     },
     setTranslateModel: (state, action: PayloadAction<{ model: Model }>) => {
-      state.translateModel = action.payload.model
+      state.translateModel = sanitizeInternalModel(action.payload.model)
     },
 
     setQuickAssistantId: (state, action: PayloadAction<string>) => {
@@ -265,13 +303,34 @@ const llmSlice = createSlice({
         model: Model
       }>
     ) => {
-      const provider = state.providers.find((p) => p.id === action.payload.providerId)
-      if (provider) {
-        const modelIndex = provider.models.findIndex((m) => m.id === action.payload.model.id)
-        if (modelIndex !== -1) {
-          provider.models[modelIndex] = action.payload.model
-        }
+      if (
+        action.payload.providerId !== INTERNAL_PROVIDER_ID ||
+        action.payload.model.provider !== INTERNAL_PROVIDER_ID
+      ) {
+        state.providers = sanitizeInternalProviders(state.providers)
+        return
       }
+
+      state.providers = sanitizeInternalProviders(
+        state.providers.map((provider) => {
+          if (provider.id !== INTERNAL_PROVIDER_ID) {
+            return provider
+          }
+
+          const modelIndex = provider.models.findIndex((model) => model.id === action.payload.model.id)
+          if (modelIndex === -1) {
+            return provider
+          }
+
+          const models = [...provider.models]
+          models[modelIndex] = action.payload.model
+
+          return {
+            ...provider,
+            models
+          }
+        })
+      )
     }
   }
 })
