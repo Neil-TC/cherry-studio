@@ -96,7 +96,7 @@ export const hubMCPServer: BuiltinMCPServer = {
   name: BuiltinMCPServerNames.hub,
   type: 'inMemory',
   isActive: true,
-  provider: 'CherryAI',
+  provider: 'Internal',
   installSource: 'builtin',
   isTrusted: true
 }
@@ -120,7 +120,7 @@ export const builtinMCPServers: BuiltinMCPServer[] = [
       MEMORY_FILE_PATH: 'YOUR_MEMORY_FILE_PATH'
     },
     shouldConfig: true,
-    provider: 'CherryAI',
+    provider: 'Internal',
     installSource: 'builtin',
     isTrusted: true
   },
@@ -129,7 +129,7 @@ export const builtinMCPServers: BuiltinMCPServer[] = [
     name: BuiltinMCPServerNames.sequentialThinking,
     type: 'inMemory',
     isActive: true,
-    provider: 'CherryAI',
+    provider: 'Internal',
     installSource: 'builtin',
     isTrusted: true
   },
@@ -141,7 +141,7 @@ export const builtinMCPServers: BuiltinMCPServer[] = [
     disabledAutoApproveTools: [...filesystemManualApprovalTools],
     shouldConfig: true,
     isActive: false,
-    provider: 'CherryAI',
+    provider: 'Internal',
     installSource: 'builtin',
     isTrusted: true
   }

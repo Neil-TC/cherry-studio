@@ -13,7 +13,6 @@ import type {
   LanHandshakeAckMessage,
   LocalTransferConnectPayload,
   LocalTransferState,
-  OperationResult,
   WebviewKeyEvent
 } from '@shared/config/types'
 import type { MCPServerLogEntry } from '@shared/config/types'
@@ -34,7 +33,6 @@ import type {
   MemoryConfig,
   MemoryListOptions,
   MemorySearchOptions,
-  Model,
   OcrProvider,
   OcrResult,
   Provider,
@@ -62,21 +60,6 @@ import type {
   SkillResult,
   SkillToggleOptions
 } from '../renderer/src/types/skill'
-
-// OpenClaw types
-type OpenClawGatewayStatus = 'stopped' | 'starting' | 'running' | 'error'
-
-interface OpenClawHealthInfo {
-  status: 'healthy' | 'unhealthy'
-  gatewayPort: number
-}
-
-interface OpenClawChannelInfo {
-  id: string
-  name: string
-  type: string
-  status: 'connected' | 'disconnected' | 'error'
-}
 
 type DirectoryListOptions = {
   recursive?: boolean
@@ -605,75 +588,6 @@ const api = {
       return () => ipcRenderer.off(IpcChannel.AgentSession_Changed, listener)
     }
   },
-  wechat: {
-    onQrLogin: (
-      callback: (data: { channelId: string; agentId: string; url: string; status: string; userId?: string }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        data: { channelId: string; agentId: string; url: string; status: string; userId?: string }
-      ) => {
-        callback(data)
-      }
-      ipcRenderer.on(IpcChannel.WeChat_QrLogin, listener)
-      return () => ipcRenderer.off(IpcChannel.WeChat_QrLogin, listener)
-    },
-    hasCredentials: (channelId: string): Promise<{ exists: boolean; userId?: string }> =>
-      ipcRenderer.invoke(IpcChannel.WeChat_HasCredentials, channelId)
-  },
-  feishu: {
-    onQrLogin: (
-      callback: (data: {
-        channelId: string
-        agentId: string
-        url: string
-        status: string
-        appId?: string
-        appSecret?: string
-      }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        data: { channelId: string; agentId: string; url: string; status: string; appId?: string; appSecret?: string }
-      ) => {
-        callback(data)
-      }
-      ipcRenderer.on(IpcChannel.Feishu_QrLogin, listener)
-      return () => ipcRenderer.off(IpcChannel.Feishu_QrLogin, listener)
-    }
-  },
-  channel: {
-    onLog: (
-      callback: (log: { timestamp: number; level: string; message: string; channelId: string }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        log: { timestamp: number; level: string; message: string; channelId: string }
-      ) => {
-        callback(log)
-      }
-      ipcRenderer.on(IpcChannel.Channel_Log, listener)
-      return () => ipcRenderer.off(IpcChannel.Channel_Log, listener)
-    },
-    onStatusChange: (
-      callback: (status: { channelId: string; connected: boolean; error?: string }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        status: { channelId: string; connected: boolean; error?: string }
-      ) => {
-        callback(status)
-      }
-      ipcRenderer.on(IpcChannel.Channel_StatusChange, listener)
-      return () => ipcRenderer.off(IpcChannel.Channel_StatusChange, listener)
-    },
-    getLogs: (
-      channelId: string
-    ): Promise<Array<{ timestamp: number; level: string; message: string; channelId: string }>> =>
-      ipcRenderer.invoke(IpcChannel.Channel_GetLogs, channelId),
-    getStatuses: (): Promise<Array<{ channelId: string; connected: boolean; error?: string }>> =>
-      ipcRenderer.invoke(IpcChannel.Channel_GetStatuses)
-  },
   quoteToMainWindow: (text: string) => ipcRenderer.invoke(IpcChannel.App_QuoteToMain, text),
   setDisableHardwareAcceleration: (isDisable: boolean) =>
     ipcRenderer.invoke(IpcChannel.App_SetDisableHardwareAcceleration, isDisable),
@@ -809,29 +723,6 @@ const api = {
     sendFile: (filePath: string): Promise<LanFileCompleteMessage> =>
       ipcRenderer.invoke(IpcChannel.LocalTransfer_SendFile, { filePath }),
     cancelTransfer: (): Promise<void> => ipcRenderer.invoke(IpcChannel.LocalTransfer_CancelTransfer)
-  },
-  openclaw: {
-    checkInstalled: (): Promise<{ installed: boolean; path: string | null; needsMigration: boolean }> =>
-      ipcRenderer.invoke(IpcChannel.OpenClaw_CheckInstalled),
-    install: (): Promise<OperationResult> => ipcRenderer.invoke(IpcChannel.OpenClaw_Install),
-    uninstall: (): Promise<OperationResult> => ipcRenderer.invoke(IpcChannel.OpenClaw_Uninstall),
-    startGateway: (port?: number): Promise<OperationResult> =>
-      ipcRenderer.invoke(IpcChannel.OpenClaw_StartGateway, port),
-    stopGateway: (): Promise<OperationResult> => ipcRenderer.invoke(IpcChannel.OpenClaw_StopGateway),
-    getStatus: (): Promise<{ status: OpenClawGatewayStatus; port: number }> =>
-      ipcRenderer.invoke(IpcChannel.OpenClaw_GetStatus),
-    checkHealth: (): Promise<OpenClawHealthInfo> => ipcRenderer.invoke(IpcChannel.OpenClaw_CheckHealth),
-    getDashboardUrl: (): Promise<string> => ipcRenderer.invoke(IpcChannel.OpenClaw_GetDashboardUrl),
-    syncConfig: (provider: Provider, primaryModel: Model): Promise<OperationResult> =>
-      ipcRenderer.invoke(IpcChannel.OpenClaw_SyncConfig, provider, primaryModel),
-    getChannels: (): Promise<OpenClawChannelInfo[]> => ipcRenderer.invoke(IpcChannel.OpenClaw_GetChannels),
-    checkUpdate: (): Promise<{
-      hasUpdate: boolean
-      currentVersion: string | null
-      latestVersion: string | null
-      message?: string
-    }> => ipcRenderer.invoke(IpcChannel.OpenClaw_CheckUpdate),
-    performUpdate: (): Promise<OperationResult> => ipcRenderer.invoke(IpcChannel.OpenClaw_PerformUpdate)
   },
   analytics: {
     trackTokenUsage: (data: TokenUsageData) => ipcRenderer.invoke(IpcChannel.Analytics_TrackTokenUsage, data)

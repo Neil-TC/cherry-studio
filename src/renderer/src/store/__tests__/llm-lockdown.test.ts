@@ -116,6 +116,6 @@ describe('llm lockdown state', () => {
     const providers = getStoreProviders()
 
     expect(providers.map((provider) => provider.id)).toEqual([INTERNAL_PROVIDER_ID])
-    expect(providers.some((provider) => provider.id === 'cherryai')).toBe(false)
+    expect(providers.every((provider) => provider.id === INTERNAL_PROVIDER_ID)).toBe(true)
   })
 })

@@ -6,15 +6,15 @@ import {
   MAX_CONTEXT_COUNT,
   UNLIMITED_CONTEXT_COUNT
 } from '@renderer/config/constant'
+import { INTERNAL_PROVIDER } from '@renderer/config/internalLockdown'
+import { INTERNAL_PROVIDER_ID } from '@renderer/config/internalLockdown'
 import { getModelSupportedReasoningEffortOptions } from '@renderer/config/models'
 import { isQwenMTModel } from '@renderer/config/models/qwen'
 import { UNKNOWN } from '@renderer/config/translate'
-import { INTERNAL_PROVIDER } from '@renderer/config/internalLockdown'
 import { getStoreProviders } from '@renderer/hooks/useStore'
 import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { addAssistant } from '@renderer/store/assistants'
-import { INTERNAL_PROVIDER_ID } from '@renderer/config/internalLockdown'
 import type {
   Assistant,
   AssistantPreset,

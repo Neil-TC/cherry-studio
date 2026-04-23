@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { isNotSupportTextDeltaModel } from '@renderer/config/models'
 import { sanitizeInternalProviders } from '@renderer/config/internalLockdown'
+import { isNotSupportTextDeltaModel } from '@renderer/config/models'
 import { getDefaultProvider } from '@renderer/services/AssistantService'
 import { type RootState, useAppDispatch, useAppSelector } from '@renderer/store'
 import {

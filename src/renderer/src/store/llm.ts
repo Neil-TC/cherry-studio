@@ -16,12 +16,12 @@
  */
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
+import { isLocalAi } from '@renderer/config/env'
 import {
   INTERNAL_PROVIDER_ID,
   sanitizeInternalModel,
   sanitizeInternalProviders
 } from '@renderer/config/internalLockdown'
-import { isLocalAi } from '@renderer/config/env'
 import { internalDefaultModel } from '@renderer/config/models'
 import { SYSTEM_PROVIDERS } from '@renderer/config/providers'
 import type { AwsBedrockAuthType, Model, Provider } from '@renderer/types'

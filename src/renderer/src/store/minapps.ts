@@ -24,7 +24,7 @@ export interface MinAppsState {
   pinned: MinAppType[]
 }
 
-const initialState: MinAppsState = {
+export const initialState: MinAppsState = {
   enabled: [],
   disabled: [],
   pinned: []

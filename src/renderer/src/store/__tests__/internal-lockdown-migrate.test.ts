@@ -1,9 +1,8 @@
-import { describe, expect, it } from 'vitest'
-
 import { INTERNAL_PROVIDER_ID } from '@renderer/config/internalLockdown'
 import { allMinApps } from '@renderer/config/minapps'
-import { BuiltinMCPServerNames } from '@renderer/types'
 import migrate from '@renderer/store/migrate'
+import { BuiltinMCPServerNames } from '@renderer/types'
+import { describe, expect, it } from 'vitest'
 
 describe('internal lockdown migration', () => {
   it('sanitizes persisted external surfaces to internal-only defaults', async () => {

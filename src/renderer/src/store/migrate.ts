@@ -22,6 +22,11 @@ import {
   DEFAULT_TEMPERATURE,
   isMac
 } from '@renderer/config/constant'
+import {
+  sanitizeInternalModel,
+  sanitizeInternalProviders,
+  sanitizeSidebarIcons
+} from '@renderer/config/internalLockdown'
 import { allMinApps } from '@renderer/config/minapps'
 import { isFunctionCallingModel, isNotSupportTextDeltaModel, qwenModel, SYSTEM_MODELS } from '@renderer/config/models'
 import { BUILTIN_OCR_PROVIDERS, BUILTIN_OCR_PROVIDERS_MAP, DEFAULT_OCR_PROVIDER } from '@renderer/config/ocr'
@@ -29,11 +34,6 @@ import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
 import { SYSTEM_PROVIDERS } from '@renderer/config/providers'
 import { DEFAULT_SIDEBAR_ICONS } from '@renderer/config/sidebar'
 import db from '@renderer/databases'
-import {
-  sanitizeInternalModel,
-  sanitizeInternalProviders,
-  sanitizeSidebarIcons
-} from '@renderer/config/internalLockdown'
 import { getModel } from '@renderer/hooks/useModel'
 import i18n from '@renderer/i18n'
 import { DEFAULT_ASSISTANT_SETTINGS } from '@renderer/services/AssistantService'
@@ -150,7 +150,7 @@ function updateProvider(state: RootState, id: string, provider: Partial<Provider
 function addWebSearchProvider(state: RootState, id: string) {
   if (state.websearch && state.websearch.providers) {
     if (!state.websearch.providers.find((p) => p.id === id)) {
-      const provider = defaultWebSearchProviders.find((p) => p.id === id)
+      const provider = webSearchInitialState.providers.find((p) => p.id === id)
       if (provider) {
         // Prevent mutating read only property of object
         // Otherwise, it will cause the error: Cannot assign to read only property 'apiKey' of object '#<Object>'
@@ -177,7 +177,7 @@ function sanitizePersistedMcpServers(state: RootState) {
     return
   }
 
-  const allowedBuiltinNames = new Set([
+  const allowedBuiltinNames = new Set<string>([
     BuiltinMCPServerNames.memory,
     BuiltinMCPServerNames.sequentialThinking,
     BuiltinMCPServerNames.filesystem

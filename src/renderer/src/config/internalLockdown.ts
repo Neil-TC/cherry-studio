@@ -21,8 +21,8 @@ export function sanitizeInternalModel(model: Model | undefined): Model {
   return model?.provider === INTERNAL_PROVIDER_ID ? model : internalDefaultModel
 }
 
-export function sanitizeInternalProviders(providers: Provider[]): SystemProvider[] {
-  const existingInternalProvider = providers.findLast((provider) => provider.id === INTERNAL_PROVIDER_ID)
+export function sanitizeInternalProviders(providers: Provider[] | undefined): Provider[] {
+  const existingInternalProvider = providers?.findLast((provider) => provider.id === INTERNAL_PROVIDER_ID)
 
   if (!existingInternalProvider) {
     return [INTERNAL_PROVIDER]
@@ -46,7 +46,7 @@ export function sanitizeInternalProviders(providers: Provider[]): SystemProvider
   ]
 }
 
-export function sanitizeSidebarIcons(icons: SidebarIcon[]): SidebarIcon[] {
-  const visibleIcons = icons.filter((icon) => !REMOVED_SIDEBAR_ICONS.has(icon))
+export function sanitizeSidebarIcons(icons: SidebarIcon[] | undefined): SidebarIcon[] {
+  const visibleIcons = (icons ?? []).filter((icon) => !REMOVED_SIDEBAR_ICONS.has(icon))
   return visibleIcons.includes('assistants') ? visibleIcons : ['assistants', ...visibleIcons]
 }

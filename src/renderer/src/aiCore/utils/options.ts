@@ -17,7 +17,6 @@ import {
 } from '@renderer/config/models'
 import { mapLanguageToQwenMTModel } from '@renderer/config/translate'
 import { getStoreSetting } from '@renderer/hooks/useSettings'
-import { getProviderById } from '@renderer/services/ProviderService'
 import {
   type Assistant,
   type GroqServiceTier,
@@ -100,8 +99,8 @@ function getServiceTier<T extends Provider>(model: Model, provider: T): OpenAISe
   }
 }
 
-function getVerbosity(model: Model): OpenAIVerbosity {
-  if (!isSupportVerbosityModel(model) || !isSupportVerbosityProvider(getProviderById(model.provider)!)) {
+function getVerbosity(model: Model, provider: Provider): OpenAIVerbosity {
+  if (!isSupportVerbosityModel(model) || !isSupportVerbosityProvider(provider)) {
     return undefined
   }
   const openAI = getStoreSetting('openAI')
@@ -165,7 +164,7 @@ export function buildProviderOptions(
   // 构建 provider 特定的选项
   let providerSpecificOptions: Record<string, any> = {}
   const serviceTier = getServiceTier(model, actualProvider)
-  const textVerbosity = getVerbosity(model)
+  const textVerbosity = getVerbosity(model, actualProvider)
 
   // 根据 provider ID 构建特定选项
   switch (rawProviderId) {
@@ -174,7 +173,14 @@ export function buildProviderOptions(
     case 'azure':
     case 'azure-responses':
     case 'huggingface':
-      providerSpecificOptions = buildOpenAIProviderOptions(assistant, model, capabilities, serviceTier, textVerbosity)
+      providerSpecificOptions = buildOpenAIProviderOptions(
+        assistant,
+        model,
+        actualProvider,
+        capabilities,
+        serviceTier,
+        textVerbosity
+      )
       break
     case 'anthropic':
     case 'azure-anthropic':
@@ -199,7 +205,14 @@ export function buildProviderOptions(
     case 'newapi':
     case 'aihubmix':
     case SystemProviderIds.gateway:
-      providerSpecificOptions = buildAIGatewayOptions(assistant, model, capabilities, serviceTier, textVerbosity)
+      providerSpecificOptions = buildAIGatewayOptions(
+        assistant,
+        model,
+        actualProvider,
+        capabilities,
+        serviceTier,
+        textVerbosity
+      )
       break
     case 'deepseek':
     case 'openrouter':
@@ -317,6 +330,7 @@ export function buildProviderOptions(
 function buildOpenAIProviderOptions(
   assistant: Assistant,
   model: Model,
+  provider: Provider,
   capabilities: Pick<ProviderCapabilities, 'enableReasoning' | 'enableWebSearch' | 'enableGenerateImage'>,
   serviceTier: OpenAIServiceTier,
   textVerbosity?: OpenAIVerbosity
@@ -336,12 +350,6 @@ function buildOpenAIProviderOptions(
       ...(isReasoningModel(model) && { forceReasoning: true })
     }
   }
-  const provider = getProviderById(model.provider)
-
-  if (!provider) {
-    throw new Error(`Provider ${model.provider} not found`)
-  }
-
   if (isSupportVerbosityModel(model) && isSupportVerbosityProvider(provider)) {
     const openAI = getStoreSetting<'openAI'>('openAI')
     const userVerbosity = openAI?.verbosity
@@ -551,6 +559,7 @@ function buildGenericProviderOptions(
 function buildAIGatewayOptions(
   assistant: Assistant,
   model: Model,
+  provider: Provider,
   capabilities: Pick<ProviderCapabilities, 'enableReasoning' | 'enableWebSearch' | 'enableGenerateImage'>,
   serviceTier: OpenAIServiceTier,
   textVerbosity?: OpenAIVerbosity
@@ -580,7 +589,7 @@ function buildAIGatewayOptions(
     case 'gemini':
       return buildGeminiProviderOptions(assistant, model, capabilities)
     case 'openai-response':
-      return buildOpenAIProviderOptions(assistant, model, capabilities, serviceTier, textVerbosity)
+      return buildOpenAIProviderOptions(assistant, model, provider, capabilities, serviceTier, textVerbosity)
     case 'openai':
     case 'image-generation':
       return buildGenericProviderOptions('openai-compatible', assistant, model, capabilities)
@@ -590,7 +599,7 @@ function buildAIGatewayOptions(
   if (isAnthropicModel(model)) {
     return buildAnthropicProviderOptions(assistant, model, capabilities)
   } else if (isOpenAIModel(model)) {
-    return buildOpenAIProviderOptions(assistant, model, capabilities, serviceTier, textVerbosity)
+    return buildOpenAIProviderOptions(assistant, model, provider, capabilities, serviceTier, textVerbosity)
   } else if (isGeminiModel(model)) {
     return buildGeminiProviderOptions(assistant, model, capabilities)
   } else if (isGrokModel(model)) {
