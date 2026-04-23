@@ -17,6 +17,12 @@ describe('internal lockdown helpers', () => {
             name: 'Custom Local',
             provider: 'internal',
             group: 'Internal'
+          },
+          {
+            id: 'external-local',
+            name: 'External Local',
+            provider: 'openai',
+            group: 'OpenAI'
           }
         ],
         isSystem: true,

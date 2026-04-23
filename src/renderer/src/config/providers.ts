@@ -65,7 +65,7 @@ import type { AtLeast, SystemProvider, SystemProviderId } from '@renderer/types'
 import { OpenAIServiceTiers } from '@renderer/types'
 
 import { TOKENFLUX_HOST } from './constant'
-import { qwenModel, SYSTEM_MODELS } from './models'
+import { internalDefaultModel, qwenModel, SYSTEM_MODELS } from './models'
 
 export const CHERRYAI_PROVIDER: SystemProvider = {
   id: 'cherryai' as SystemProviderId,
@@ -79,6 +79,16 @@ export const CHERRYAI_PROVIDER: SystemProvider = {
 }
 
 export const SYSTEM_PROVIDERS_CONFIG: Record<SystemProviderId, SystemProvider> = {
+  internal: {
+    id: 'internal',
+    name: 'Internal Server',
+    type: 'openai',
+    apiKey: '',
+    apiHost: 'http://localhost:8000/v1',
+    models: [internalDefaultModel],
+    isSystem: true,
+    enabled: true
+  },
   cherryin: {
     id: 'cherryin',
     name: 'CherryIN',

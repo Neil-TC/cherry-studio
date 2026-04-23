@@ -28,6 +28,8 @@ export function sanitizeInternalProviders(providers: Provider[]): SystemProvider
     return [INTERNAL_PROVIDER]
   }
 
+  const models = existingInternalProvider.models?.filter((model) => model.provider === INTERNAL_PROVIDER_ID)
+
   return [
     {
       ...INTERNAL_PROVIDER,
@@ -39,7 +41,7 @@ export function sanitizeInternalProviders(providers: Provider[]): SystemProvider
       apiHost: existingInternalProvider.apiHost ?? INTERNAL_PROVIDER.apiHost,
       apiKey: existingInternalProvider.apiKey ?? INTERNAL_PROVIDER.apiKey,
       name: existingInternalProvider.name ?? INTERNAL_PROVIDER.name,
-      models: existingInternalProvider.models?.length ? existingInternalProvider.models : INTERNAL_PROVIDER.models
+      models: models?.length ? models : INTERNAL_PROVIDER.models
     }
   ]
 }
