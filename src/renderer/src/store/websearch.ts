@@ -61,10 +61,10 @@ export interface WebSearchState {
 export type CherryWebSearchConfig = Pick<WebSearchState, 'searchWithTime' | 'maxResults' | 'excludeDomains'>
 
 export const initialState: WebSearchState = {
-  defaultProvider: 'local-bing',
-  providers: WEB_SEARCH_PROVIDERS,
-  searchWithTime: true,
-  maxResults: 5,
+  defaultProvider: '',
+  providers: [],
+  searchWithTime: false,
+  maxResults: 0,
   excludeDomains: [],
   subscribeSources: [],
   overwrite: false,
@@ -75,7 +75,7 @@ export const initialState: WebSearchState = {
   providerConfig: {}
 }
 
-export const defaultWebSearchProviders = initialState.providers
+export const defaultWebSearchProviders = WEB_SEARCH_PROVIDERS
 
 const websearchSlice = createSlice({
   name: 'websearch',

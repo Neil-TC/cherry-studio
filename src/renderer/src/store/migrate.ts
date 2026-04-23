@@ -29,6 +29,11 @@ import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
 import { SYSTEM_PROVIDERS } from '@renderer/config/providers'
 import { DEFAULT_SIDEBAR_ICONS } from '@renderer/config/sidebar'
 import db from '@renderer/databases'
+import {
+  sanitizeInternalModel,
+  sanitizeInternalProviders,
+  sanitizeSidebarIcons
+} from '@renderer/config/internalLockdown'
 import { getModel } from '@renderer/hooks/useModel'
 import i18n from '@renderer/i18n'
 import { DEFAULT_ASSISTANT_SETTINGS } from '@renderer/services/AssistantService'
@@ -42,7 +47,7 @@ import type {
   TranslateLanguageCode,
   WebSearchProvider
 } from '@renderer/types'
-import { isBuiltinMCPServer, isSystemProvider, SystemProviderIds } from '@renderer/types'
+import { BuiltinMCPServerNames, isBuiltinMCPServer, isSystemProvider, SystemProviderIds } from '@renderer/types'
 import { getDefaultGroupName, getLeadingEmoji, runAsyncFunction, uuid } from '@renderer/utils'
 import {
   isSupportArrayContentProvider,
@@ -58,11 +63,12 @@ import type { RootState } from '.'
 import { DEFAULT_TOOL_ORDER, DEFAULT_TOOL_ORDER_BY_SCOPE } from './inputTools'
 import { initialState as llmInitialState, moveProvider } from './llm'
 import { mcpSlice } from './mcp'
+import { initialState as minAppsInitialState } from './minapps'
 import { initialState as notesInitialState } from './note'
 import { defaultActionItems } from './selectionStore'
 import { initialState as settingsInitialState } from './settings'
 import { initialState as shortcutsInitialState } from './shortcuts'
-import { defaultWebSearchProviders } from './websearch'
+import { initialState as webSearchInitialState } from './websearch'
 
 const logger = loggerService.withContext('Migrate')
 
@@ -164,6 +170,60 @@ function updateWebSearchProvider(state: RootState, provider: Partial<WebSearchPr
       }
     }
   }
+}
+
+function sanitizePersistedMcpServers(state: RootState) {
+  if (!state.mcp?.servers) {
+    return
+  }
+
+  const allowedBuiltinNames = new Set([
+    BuiltinMCPServerNames.memory,
+    BuiltinMCPServerNames.sequentialThinking,
+    BuiltinMCPServerNames.filesystem
+  ])
+
+  state.mcp.servers = state.mcp.servers.filter((server) => {
+    if (server.installSource !== 'builtin' && !isBuiltinMCPServer(server)) {
+      return true
+    }
+
+    return allowedBuiltinNames.has(server.name)
+  })
+}
+
+function sanitizeInternalSurfaceState(state: RootState) {
+  if (state.llm) {
+    state.llm.providers = sanitizeInternalProviders(state.llm.providers)
+    state.llm.defaultModel = sanitizeInternalModel(state.llm.defaultModel)
+    state.llm.topicNamingModel = sanitizeInternalModel(state.llm.topicNamingModel)
+    state.llm.quickModel = sanitizeInternalModel(state.llm.quickModel)
+    state.llm.translateModel = sanitizeInternalModel(state.llm.translateModel)
+  }
+
+  if (state.settings?.sidebarIcons) {
+    state.settings.sidebarIcons.visible = sanitizeSidebarIcons(state.settings.sidebarIcons.visible)
+    state.settings.sidebarIcons.disabled = []
+  }
+
+  if (state.minapps) {
+    state.minapps.enabled = []
+    state.minapps.disabled = []
+    state.minapps.pinned = []
+  } else {
+    state.minapps = minAppsInitialState
+  }
+
+  if (state.websearch) {
+    state.websearch = {
+      ...webSearchInitialState,
+      providers: [],
+      subscribeSources: [],
+      providerConfig: {}
+    }
+  }
+
+  sanitizePersistedMcpServers(state)
 }
 
 function addSelectionAction(state: RootState, id: string) {
@@ -3410,6 +3470,16 @@ const migrateConfig = {
       return state
     } catch (error) {
       logger.error('migrate 206 error', error as Error)
+      return state
+    }
+  },
+  '207': (state: RootState) => {
+    try {
+      sanitizeInternalSurfaceState(state)
+      logger.info('migrate 207 success')
+      return state
+    } catch (error) {
+      logger.error('migrate 207 error', error as Error)
       return state
     }
   }

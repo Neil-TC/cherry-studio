@@ -112,28 +112,6 @@ export const hubMCPServer: BuiltinMCPServer = {
 export const builtinMCPServers: BuiltinMCPServer[] = [
   {
     id: nanoid(),
-    name: BuiltinMCPServerNames.flomo,
-    reference: 'https://flomoapp.com',
-    type: 'inMemory',
-    isActive: false,
-    provider: 'flomo',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
-    name: BuiltinMCPServerNames.mcpAutoInstall,
-    reference: 'https://docs.cherry-ai.com/advanced-basic/mcp/auto-install',
-    type: 'inMemory',
-    command: 'npx',
-    args: ['-y', '@mcpmarket/mcp-auto-install', 'connect', '--json'],
-    isActive: false,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
     name: BuiltinMCPServerNames.memory,
     reference: 'https://github.com/modelcontextprotocol/servers/tree/main/src/memory',
     type: 'inMemory',
@@ -157,28 +135,6 @@ export const builtinMCPServers: BuiltinMCPServer[] = [
   },
   {
     id: nanoid(),
-    name: BuiltinMCPServerNames.braveSearch,
-    type: 'inMemory',
-    isActive: false,
-    env: {
-      BRAVE_API_KEY: 'YOUR_API_KEY'
-    },
-    shouldConfig: true,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
-    name: BuiltinMCPServerNames.fetch,
-    type: 'inMemory',
-    isActive: true,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
     name: BuiltinMCPServerNames.filesystem,
     type: 'inMemory',
     args: ['/Users/username/Desktop'],
@@ -186,61 +142,6 @@ export const builtinMCPServers: BuiltinMCPServer[] = [
     shouldConfig: true,
     isActive: false,
     provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
-    name: BuiltinMCPServerNames.difyKnowledge,
-    type: 'inMemory',
-    isActive: false,
-    env: {
-      DIFY_KEY: 'YOUR_DIFY_KEY'
-    },
-    shouldConfig: true,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
-    name: BuiltinMCPServerNames.python,
-    type: 'inMemory',
-    isActive: false,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
-    name: '@cherry/didi-mcp',
-    reference: 'https://mcp.didichuxing.com/',
-    type: 'inMemory',
-    isActive: false,
-    env: {
-      DIDI_API_KEY: 'YOUR_DIDI_API_KEY'
-    },
-    shouldConfig: true,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
-    name: BuiltinMCPServerNames.browser,
-    type: 'inMemory',
-    isActive: false,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
-    name: BuiltinMCPServerNames.nowledgeMem,
-    reference: 'https://mem.nowledge.co/',
-    type: 'inMemory',
-    isActive: false,
-    provider: 'Nowledge',
     installSource: 'builtin',
     isTrusted: true
   }
