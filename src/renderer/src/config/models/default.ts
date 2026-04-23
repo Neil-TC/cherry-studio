@@ -7,17 +7,25 @@ export const qwenModel: Model = {
   group: 'Qwen'
 }
 
+export const internalDefaultModel: Model = {
+  id: 'local-model',
+  name: 'Local Model',
+  provider: 'internal',
+  group: 'Internal'
+}
+
 export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> = {
   defaultModel: [
     // Default assistant model
-    qwenModel,
+    internalDefaultModel,
     // Default topic naming model
-    qwenModel,
+    internalDefaultModel,
     // Default translation model
-    qwenModel,
+    internalDefaultModel,
     // Default quick assistant model
-    qwenModel
+    internalDefaultModel
   ],
+  internal: [internalDefaultModel],
   cherryin: [],
   vertexai: [],
   sophnet: [],
