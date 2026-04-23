@@ -165,7 +165,7 @@ describe('internal lockdown migration', () => {
           isBunInstalled: true
         }
       } as any,
-      208
+      209
     )
 
     expect(migrated.llm.providers).toHaveLength(1)
@@ -190,6 +190,7 @@ describe('internal lockdown migration', () => {
       'openclaw'
     ])
     expect(migrated.settings.sidebarIcons.disabled).toEqual([])
+    expect(migrated.settings.navbarPosition).toBe('left')
 
     expect(migrated.minapps.enabled).toEqual([])
     expect(migrated.minapps.disabled).toEqual([])
